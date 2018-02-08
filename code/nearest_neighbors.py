@@ -3,6 +3,7 @@ from collections import Counter
 from linear_algebra import distance
 from statistics import mean
 import math, random
+from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 
 def raw_majority_vote(labels):
@@ -14,7 +15,7 @@ def majority_vote(labels):
     """assumes that labels are ordered from nearest to farthest"""
     vote_counts = Counter(labels)
     winner, winner_count = vote_counts.most_common(1)[0]
-    num_winners = len([count 
+    num_winners = len([count
                        for count in vote_counts.values()
                        if count == winner_count])
 
@@ -26,7 +27,7 @@ def majority_vote(labels):
 
 def knn_classify(k, labeled_points, new_point):
     """each labeled point should be a pair (point, label)"""
-    
+
     # order the labeled points from nearest to farthest
     by_distance = sorted(labeled_points,
                          key=lambda (point, _): distance(point, new_point))
@@ -42,7 +43,14 @@ cities = [(-86.75,33.5666666666667,'Python'),(-88.25,30.6833333333333,'Python'),
 cities = [([longitude, latitude], language) for longitude, latitude, language in cities]
 
 def plot_state_borders(plt, color='0.8'):
-    pass
+    m = Basemap(llcrnrlon=-119,llcrnrlat=22,urcrnrlon=-64,urcrnrlat=49,
+         projection='lcc',lat_1=33,lat_2=45,lon_0=-95)
+
+    shp_info = m.readshapefile('/home/user/workspace/us-states-shp/cb_2016_us_state_500k','states',drawbounds=True)
+    m.drawcoastlines()
+
+    return m
+
 
 def plot_cities():
 
@@ -57,15 +65,16 @@ def plot_cities():
         plots[language][0].append(longitude)
         plots[language][1].append(latitude)
 
+    m = plot_state_borders(plt)    # assume we have a function that does this
+
     # create a scatter series for each language
     for language, (x, y) in plots.iteritems():
-        plt.scatter(x, y, color=colors[language], marker=markers[language],
+        xx,yy = m(x, y)
+        m.scatter(xx, yy, color=colors[language], marker=markers[language],
                           label=language, zorder=10)
 
-    plot_state_borders(plt)    # assume we have a function that does this
-
     plt.legend(loc=0)          # let matplotlib choose the location
-    plt.axis([-130,-60,20,55]) # set the axes
+    # plt.axis([-130,-60,20,55]) # set the axes
     plt.title("Favorite Programming Languages")
     plt.show()
 
@@ -80,15 +89,17 @@ def classify_and_plot_grid(k=1):
             plots[predicted_language][0].append(longitude)
             plots[predicted_language][1].append(latitude)
 
+    m = plot_state_borders(plt, color='black')    # assume we have a function that does this
+
     # create a scatter series for each language
     for language, (x, y) in plots.iteritems():
-        plt.scatter(x, y, color=colors[language], marker=markers[language],
+        xx,yy = m(x, y)
+        m.scatter(xx, yy, color=colors[language], marker=markers[language],
                           label=language, zorder=0)
 
-    plot_state_borders(plt, color='black')    # assume we have a function that does this
+
 
     plt.legend(loc=0)          # let matplotlib choose the location
-    plt.axis([-130,-60,20,55]) # set the axes
     plt.title(str(k) + "-Nearest Neighbor Programming Languages")
     plt.show()
 
@@ -112,13 +123,13 @@ if __name__ == "__main__":
 
         for location, actual_language in cities:
 
-            other_cities = [other_city 
+            other_cities = [other_city
                             for other_city in cities
                             if other_city != (location, actual_language)]
 
             predicted_language = knn_classify(k, other_cities, location)
 
-            if predicted_language == actual_language: 
+            if predicted_language == actual_language:
                 num_correct += 1
 
         print k, "neighbor[s]:", num_correct, "correct out of", len(cities)

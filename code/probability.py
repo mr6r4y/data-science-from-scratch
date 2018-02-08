@@ -25,10 +25,16 @@ def plot_normal_pdfs(plt):
     plt.plot(xs,[normal_pdf(x,sigma=0.5) for x in xs],':',label='mu=0,sigma=0.5')
     plt.plot(xs,[normal_pdf(x,mu=-1)   for x in xs],'-.',label='mu=-1,sigma=1')
     plt.legend()
-    plt.show()      
+    plt.show()
 
 def normal_cdf(x, mu=0,sigma=1):
-    return (1 + math.erf((x - mu) / math.sqrt(2) / sigma)) / 2  
+    return (1 + math.erf((x - mu) / math.sqrt(2) / sigma)) / 2
+
+
+def phi(x):
+    'Cumulative distribution function for the standard normal distribution'
+    return (1.0 + erf(x / sqrt(2.0))) / 2.0
+
 
 def plot_normal_cdfs(plt):
     xs = [x / 10.0 for x in range(-50, 50)]
@@ -45,7 +51,7 @@ def inverse_normal_cdf(p, mu=0, sigma=1, tolerance=0.00001):
     # if not standard, compute standard and rescale
     if mu != 0 or sigma != 1:
         return mu + sigma * inverse_normal_cdf(p, tolerance=tolerance)
-    
+
     low_z, low_p = -10.0, 0            # normal_cdf(-10) is (very close to) 0
     hi_z,  hi_p  =  10.0, 1            # normal_cdf(10)  is (very close to) 1
     while hi_z - low_z > tolerance:
@@ -69,22 +75,22 @@ def binomial(p, n):
     return sum(bernoulli_trial(p) for _ in range(n))
 
 def make_hist(p, n, num_points):
-    
+
     data = [binomial(p, n) for _ in range(num_points)]
-    
+
     # use a bar chart to show the actual binomial samples
     histogram = Counter(data)
     plt.bar([x - 0.4 for x in histogram.keys()],
             [v / num_points for v in histogram.values()],
             0.8,
             color='0.75')
-    
+
     mu = p * n
     sigma = math.sqrt(n * p * (1 - p))
 
     # use a line chart to show the normal approximation
     xs = range(min(data), max(data) + 1)
-    ys = [normal_cdf(i + 0.5, mu, sigma) - normal_cdf(i - 0.5, mu, sigma) 
+    ys = [normal_cdf(i + 0.5, mu, sigma) - normal_cdf(i - 0.5, mu, sigma)
           for i in xs]
     plt.plot(xs,ys)
     plt.show()
