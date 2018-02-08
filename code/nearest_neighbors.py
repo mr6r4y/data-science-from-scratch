@@ -46,7 +46,7 @@ def plot_state_borders(plt, color='0.8'):
     m = Basemap(llcrnrlon=-119,llcrnrlat=22,urcrnrlon=-64,urcrnrlat=49,
          projection='lcc',lat_1=33,lat_2=45,lon_0=-95)
 
-    shp_info = m.readshapefile('/home/user/workspace/us-states-shp/cb_2016_us_state_500k','states',drawbounds=True)
+    shp_info = m.readshapefile('./us-states-shp/cb_2016_us_state_500k','states',drawbounds=True)
     m.drawcoastlines()
 
     return m
